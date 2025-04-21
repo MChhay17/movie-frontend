@@ -6,21 +6,24 @@ function LoginPage() {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const navigate = useNavigate();
 
-  const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/signin`, formData);
-      localStorage.setItem("token", res.data.token);
-      navigate("/");
-    } catch (err) {
-      alert("Login failed");
+      const token = res.data.token.replace("JWT ", "");
+      localStorage.setItem("token", token);
+      alert("Login successful!");
+      navigate("/movies");
+    } catch {
+      alert("Login failed. Check your credentials.");
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      <h2>Login</h2>
       <input name="username" placeholder="Username" onChange={handleChange} required />
       <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
       <button type="submit">Log In</button>
@@ -29,3 +32,6 @@ function LoginPage() {
 }
 
 export default LoginPage;
+
+
+
