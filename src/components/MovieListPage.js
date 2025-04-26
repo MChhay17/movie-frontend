@@ -1,38 +1,51 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-function MovieListPage() {
+const API_URL = process.env.REACT_APP_API_URL;
+
+const MovieListPage = () => {
   const [movies, setMovies] = useState([]);
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return navigate("/login");
-
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/movies?reviews=true`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then((res) => setMovies(res.data))
-      .catch(() => alert("Unauthorized or error loading movies"));
-  }, [navigate]);
+    const fetchMovies = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${API_URL}/movies?reviews=true`, {
+          headers: { Authorization: token },
+        });
+        setMovies(response.data);
+      } catch (err) {
+        setError("Unauthorized or error loading movies");
+      }
+    };
+    fetchMovies();
+  }, []);
 
   return (
     <div>
-      <h2>Top Rated Movies</h2>
+      <h1>Top Rated Movies</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
       {movies.map((movie) => (
-        <div key={movie._id}>
-          <img src={movie.imageUrl} alt={movie.title} width="150" />
-          <h3>{movie.title}</h3>
-          <p>Avg Rating: {movie.avgRating?.toFixed(1) || "No reviews yet"}</p>
-          <Link to={`/movies/${movie._id}`}>View Details</Link>
+        <div key={movie._id} style={{ marginBottom: "1em" }}>
+          <h3>
+            <Link to={`/movies/${movie._id}`}>{movie.title}</Link>
+          </h3>
+          {movie.imageURL && (
+            <img src={movie.imageURL} alt={movie.title} width="150" />
+          )}
+          <p>Average Rating: {movie.avgRating?.toFixed(1) || "N/A"}</p>
         </div>
       ))}
     </div>
   );
-}
+};
 
 export default MovieListPage;
+
+
+
+
 
 
